@@ -1,0 +1,8 @@
+# Matt Pocock TypeScript & Security Guidelines
+
+- **Strict TypeScript**: TypeScript must be strictly typed. No implicit any is allowed.
+- **ts-reset**: Always import `@total-typescript/ts-reset` in the global `layout.tsx` to fix `.json()` and `.filter(Boolean)`.
+- **Zod Validation**: All API responses and form inputs must be strictly validated using Zod. No manual type casting `as Type`.
+- **Zustand**: Use Zustand for global state management. Do not mutate state directly; use proper immutable updates.
+- **Null Safety**: Always use optional chaining `?.` and nullish coalescing `?? []` when dealing with arrays or objects from APIs.
+- **No Direct Push**: Never run `git push origin main`. Use `gh pr create` instead.
