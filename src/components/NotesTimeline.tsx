@@ -47,18 +47,6 @@ export default function NotesTimeline({ habits }: NotesTimelineProps) {
     });
   }, [allNotes, filterPeriod]);
 
-  if (allNotes.length === 0) {
-    return (
-      <div className="bg-slate-900 border border-dashed border-slate-700 rounded-2xl p-6 text-center">
-        <div className="text-3xl mb-2">📝</div>
-        <h3 className="text-slate-200 text-sm font-bold mb-1">尚無打卡筆記</h3>
-        <p className="text-slate-500 text-xs">
-          在打卡時填寫心情或成果，記錄會自動收錄在此處形成養成日記！
-        </p>
-      </div>
-    );
-  }
-
   const periodOptions: { id: FilterPeriod; label: string }[] = [
     { id: 'today', label: '📅 本日' },
     { id: 'week', label: '🗓️ 本週' },
@@ -78,7 +66,7 @@ export default function NotesTimeline({ habits }: NotesTimelineProps) {
         </h3>
       </div>
 
-      {/* 💡 時間分類頁籤按鈕 */}
+      {/* 💡 時間分類頁籤按鈕（隨時顯示） */}
       <div className="grid grid-cols-4 gap-1.5 bg-slate-950 border border-slate-800 rounded-xl p-1 mb-5">
         {periodOptions.map((opt) => (
           <button
@@ -98,8 +86,12 @@ export default function NotesTimeline({ habits }: NotesTimelineProps) {
 
       {/* 時間軸清單 */}
       {filteredNotes.length === 0 ? (
-        <div className="py-6 text-center text-xs text-slate-500 bg-slate-950/50 rounded-xl border border-slate-800/50">
-          在此時間範圍內沒有新增打卡筆記喔！
+        <div className="py-8 text-center bg-slate-950/50 rounded-xl border border-dashed border-slate-800">
+          <div className="text-2xl mb-1">📝</div>
+          <p className="text-xs text-slate-400 font-bold mb-1">此時間範圍內尚無筆記</p>
+          <p className="text-[10px] text-slate-600">
+            在打卡時填寫心情或成果，記錄會自動收錄在此處！
+          </p>
         </div>
       ) : (
         <div className="relative pl-6 space-y-4 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-800">

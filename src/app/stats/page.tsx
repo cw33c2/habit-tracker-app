@@ -8,7 +8,7 @@ import Link from 'next/link';
 
 
 
-type ViewMode = 'week' | 'month';
+type ViewMode = 'today' | 'week' | 'month';
 
 // 取得過去 N 天的日期陣列
 function getPastDays(n: number): string[] {
@@ -35,13 +35,13 @@ function formatDate(dateStr: string): string {
 export default function StatsPage() {
   const { habits, importHabits, removeHabit } = useHabitStore();
   const [mounted, setMounted] = useState(false);
-  const [viewMode, setViewMode] = useState<ViewMode>('week');
+  const [viewMode, setViewMode] = useState<ViewMode>('today');
   const [showSheetsModal, setShowSheetsModal] = useState(false);
 
   useEffect(() => { setMounted(true); }, []);
 
   const totalHabits = (habits || []).length;
-  const days = viewMode === 'week' ? getPastDays(7) : getPastDays(30);
+  const days = viewMode === 'today' ? getPastDays(1) : viewMode === 'week' ? getPastDays(7) : getPastDays(30);
 
   // 每天完成率 (Hook 必須放在早退 if (!mounted) 之前，符合 Rules of Hooks)
   const dailyStats = useMemo(() =>
@@ -93,20 +93,28 @@ export default function StatsPage() {
           <h1 className="text-2xl font-bold text-teal-400 tracking-wider">&gt; 數據統計</h1>
         </div>
 
-        {/* View Mode Toggle */}
-        <div className="flex bg-slate-900 border border-slate-700 rounded-xl p-1 mb-6">
+        {/* View Mode Toggle (本日 / 本週 / 本月) */}
+        <div className="grid grid-cols-3 gap-1 bg-slate-900 border border-slate-700 rounded-xl p-1 mb-6">
+          <button
+            onClick={() => setViewMode('today')}
+            className={`py-2 rounded-lg text-sm font-bold transition-all text-center ${
+              viewMode === 'today' ? 'bg-teal-600 text-white shadow-md shadow-teal-950/50' : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            ☀️ 本日
+          </button>
           <button
             onClick={() => setViewMode('week')}
-            className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${
-              viewMode === 'week' ? 'bg-teal-600 text-white' : 'text-slate-400 hover:text-slate-200'
+            className={`py-2 rounded-lg text-sm font-bold transition-all text-center ${
+              viewMode === 'week' ? 'bg-teal-600 text-white shadow-md shadow-teal-950/50' : 'text-slate-400 hover:text-slate-200'
             }`}
           >
             📅 本週
           </button>
           <button
             onClick={() => setViewMode('month')}
-            className={`flex-1 py-2 rounded-lg text-sm font-bold transition-all ${
-              viewMode === 'month' ? 'bg-teal-600 text-white' : 'text-slate-400 hover:text-slate-200'
+            className={`py-2 rounded-lg text-sm font-bold transition-all text-center ${
+              viewMode === 'month' ? 'bg-teal-600 text-white shadow-md shadow-teal-950/50' : 'text-slate-400 hover:text-slate-200'
             }`}
           >
             🗓️ 本月
@@ -136,7 +144,7 @@ export default function StatsPage() {
 
         {/* Bar Chart */}
         <h2 className="text-xs text-slate-500 uppercase tracking-widest mb-4">
-          每日完成率（{viewMode === 'week' ? '近 7 天' : '近 30 天'}）
+          每日完成率（{viewMode === 'today' ? '本日' : viewMode === 'week' ? '近 7 天' : '近 30 天'}）
         </h2>
 
         {totalHabits === 0 ? (
@@ -224,7 +232,7 @@ export default function StatsPage() {
                       />
                     </div>
                     <div className="text-[10px] text-slate-600 mt-1">
-                      {viewMode === 'week' ? '近 7 天' : '近 30 天'}完成 {completedCount} / {days.length} 天
+                      {viewMode === 'today' ? '今日' : viewMode === 'week' ? '近 7 天' : '近 30 天'}完成 {completedCount} / {days.length} 天
                     </div>
                   </div>
                 );
