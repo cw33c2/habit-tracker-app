@@ -1,6 +1,7 @@
 'use client';
 import { useHabitStore } from '@/store/useHabitStore';
 import SleepStatsChart from '@/components/SleepStatsChart';
+import NotesTimeline from '@/components/NotesTimeline';
 import Heatmap from '@/components/Heatmap';
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
@@ -177,6 +178,11 @@ export default function StatsPage() {
 
         {/* 🛏️ 睡眠數據與線圖統計 */}
         <SleepStatsChart />
+
+        {/* 📖 打卡筆記養成日記時間軸 */}
+        <div className="mt-8">
+          <NotesTimeline habits={habits || []} />
+        </div>
 
         {/* Per-Habit Summary */}
         {totalHabits > 0 && (
