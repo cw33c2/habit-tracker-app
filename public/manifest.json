@@ -1,0 +1,56 @@
+{
+  "name": "極簡習慣清單",
+  "short_name": "習慣清單",
+  "description": "極簡高效的習慣追蹤工具，每天打卡培養好習慣",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#020617",
+  "theme_color": "#0f172a",
+  "orientation": "portrait-primary",
+  "lang": "zh-TW",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "🍅 番茄鐘",
+      "short_name": "番茄鐘",
+      "description": "快速啟動番茄計時器",
+      "url": "/pomodoro",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "📊 統計",
+      "short_name": "統計",
+      "description": "查看習慣統計數據",
+      "url": "/stats",
+      "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }]
+    }
+  ],
+  "categories": ["productivity", "lifestyle", "health"],
+  "prefer_related_applications": false
+}
