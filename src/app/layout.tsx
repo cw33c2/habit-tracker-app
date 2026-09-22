@@ -37,6 +37,8 @@ export const viewport: Viewport = {
   userScalable: false,
 };
 
+import { Analytics } from "@vercel/analytics/react";
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
@@ -49,6 +51,7 @@ export default function RootLayout({
         <ThemeProvider>
           {children}
           <PWAInstaller />
+          <Analytics />
         </ThemeProvider>
       </body>
     </html>
