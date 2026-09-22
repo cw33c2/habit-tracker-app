@@ -2,6 +2,7 @@
 import { Habit, useHabitStore } from '@/store/useHabitStore';
 import { useState } from 'react';
 import EditHabitForm from '@/components/EditHabitForm';
+import Link from 'next/link';
 
 export default function TaskItem({ habit, date }: { habit: Habit, date: string }) {
   const toggleHabit = useHabitStore(state => state.toggleHabit);
@@ -121,7 +122,17 @@ export default function TaskItem({ habit, date }: { habit: Habit, date: string }
         </div>
 
         {/* Complete Checkbox & Delete Actions */}
-        <div className="flex items-center gap-2 flex-shrink-0 mt-0.5">
+        <div className="flex items-center gap-1.5 flex-shrink-0 mt-0.5">
+          {/* 🍅 快速發起番茄鐘專注 */}
+          <Link
+            href={`/pomodoro?habitId=${habit.id}`}
+            onClick={(e) => e.stopPropagation()}
+            title="啟動此習慣的番茄鐘專注"
+            className="w-8 h-8 rounded-xl border border-slate-800 hover:border-rose-500/80 hover:bg-rose-950/40 text-slate-400 hover:text-rose-400 flex items-center justify-center transition-all text-sm"
+          >
+            🍅
+          </Link>
+
           <button
             onClick={(e) => {
               e.stopPropagation();

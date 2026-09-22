@@ -1,17 +1,21 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useHabitStore } from '@/store/useHabitStore';
 import { playTimerFinishSound } from '@/lib/sound';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
 type Mode = 'work' | 'break';
 
-export default function PomodoroPage() {
+function PomodoroContent() {
   const habits = useHabitStore((state) => state.habits);
   const toggleHabit = useHabitStore((state) => state.toggleHabit);
   const incrementPomodoro = useHabitStore((state) => state.incrementPomodoro);
   const storePomodoroSessions = useHabitStore((state) => state.pomodoroSessions || 0);
+
+  const searchParams = useSearchParams();
+  const initialHabitId = searchParams.get('habitId') || '';
 
   const WORK_TIME = 25 * 60; // 25 分鐘
   const BREAK_TIME = 5 * 60;  // 5 分鐘
@@ -19,7 +23,7 @@ export default function PomodoroPage() {
   const [mode, setMode] = useState<Mode>('work');
   const [timeLeft, setTimeLeft] = useState(WORK_TIME);
   const [isRunning, setIsRunning] = useState(false);
-  const [selectedHabitId, setSelectedHabitId] = useState<string>('');
+  const [selectedHabitId, setSelectedHabitId] = useState<string>(initialHabitId);
 
   // 倒數計時器 Logic
   useEffect(() => {
@@ -277,5 +281,13 @@ export default function PomodoroPage() {
       </div>
 
     </div>
+  );
+}
+
+export default function PomodoroPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-slate-950 flex items-center justify-center text-teal-400">載入中...</div>}>
+      <PomodoroContent />
+    </Suspense>
   );
 }

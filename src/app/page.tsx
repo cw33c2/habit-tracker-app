@@ -189,22 +189,52 @@ export default function Home() {
           </button>
         </div>
 
-        {/* Today's Task List */}
-        <h2 className="text-[11px] text-slate-400 font-bold mb-3 uppercase tracking-widest px-1">
-          {isToday ? '今日行程清單' : `${selectedDate} 行程`}
+        {/* Today's Task List by 4 Time Slots */}
+        <h2 className="text-[11px] text-slate-400 font-bold mb-3 uppercase tracking-widest px-1 flex items-center justify-between">
+          <span>{isToday ? '今日行程清單（4 大時段分組）' : `${selectedDate} 行程`}</span>
+          <span className="text-[10px] text-teal-400">剩餘 {remainingTasks.length} 項</span>
         </h2>
 
-        <div className="mb-6">
-          {remainingTasks.length > 0 ? (
-            remainingTasks.map(habit => (
-              <TaskItem key={habit.id} habit={habit} date={selectedDate} />
-            ))
-          ) : (
+        <div className="mb-6 space-y-5">
+          {remainingTasks.length === 0 ? (
             <div className="glass-card rounded-2xl text-center py-12 border border-slate-800">
               <div className="text-5xl mb-3 animate-bounce">🏅</div>
               <p className="text-slate-100 font-bold text-base">今日任務全數達成！</p>
               <p className="text-xs mt-1 text-slate-400">太優秀了，保持連勝迎接明天 ✨</p>
             </div>
+          ) : (
+            (() => {
+              // 時間分組邏輯
+              const morningTasks = remainingTasks.filter(h => h.time && h.time >= '05:00' && h.time < '12:00');
+              const noonTasks    = remainingTasks.filter(h => h.time && h.time >= '12:00' && h.time < '18:00');
+              const nightTasks   = remainingTasks.filter(h => h.time && (h.time >= '18:00' || h.time < '05:00'));
+              const anytimeTasks = remainingTasks.filter(h => !h.time);
+
+              const slots = [
+                { title: '🌅 早晨時段 (05:00 - 12:00)', tasks: morningTasks, color: 'text-amber-300', border: 'border-amber-500/30' },
+                { title: '☀️ 中午 / 下午 (12:00 - 18:00)', tasks: noonTasks, color: 'text-orange-300', border: 'border-orange-500/30' },
+                { title: '🌙 晚上 / 睡前 (18:00 以後)', tasks: nightTasks, color: 'text-indigo-300', border: 'border-indigo-500/30' },
+                { title: '⏰ 全天 / 未指定時間', tasks: anytimeTasks, color: 'text-teal-300', border: 'border-teal-500/30' },
+              ];
+
+              return slots
+                .filter(s => s.tasks.length > 0)
+                .map(s => (
+                  <div key={s.title} className={`bg-slate-950/60 border ${s.border} rounded-2xl p-3 shadow-md`}>
+                    <div className="flex items-center justify-between mb-2.5 px-1">
+                      <span className={`text-xs font-bold ${s.color}`}>{s.title}</span>
+                      <span className="text-[10px] text-slate-500 font-mono font-bold">
+                        {s.tasks.length} 項任務
+                      </span>
+                    </div>
+                    <div className="space-y-1">
+                      {s.tasks.map(habit => (
+                        <TaskItem key={habit.id} habit={habit} date={selectedDate} />
+                      ))}
+                    </div>
+                  </div>
+                ));
+            })()
           )}
         </div>
 
