@@ -13,13 +13,13 @@ html.theme-dark {
 
 /* 2. 🟣 紫羅蘭微光 (Violet Twilight) */
 html.theme-violet {
-  --background: #0b0726;
+  --background: #1e0b36;
   --foreground: #f5f3ff;
 }
 
 /* 3. 💗 賽博霓虹 (Cyber Neon) */
 html.theme-cyber {
-  --background: #140217;
+  --background: #2a0429;
   --foreground: #fdf2f8;
 }
 

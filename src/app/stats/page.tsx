@@ -79,7 +79,7 @@ export default function StatsPage() {
   const maxRate = Math.max(...dailyStats.map(d => d.rate), 1); // avoid divide by 0
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-300 font-sans pb-36">
+    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] font-sans pb-36 transition-colors duration-400">
       <main className="max-w-md mx-auto p-4 sm:p-6">
 
         {/* Header */}
