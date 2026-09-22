@@ -43,6 +43,10 @@ export default function PWAInstaller() {
     const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
     setIsIOS(ios);
     if (ios) {
+      // 已按過 X 就不再打擾
+      try {
+        if (localStorage.getItem('pwa-banner-dismissed')) return;
+      } catch {}
       setTimeout(() => setShowBanner(true), 2500);
       return;
     }
@@ -50,6 +54,10 @@ export default function PWAInstaller() {
     // ── Android / Desktop：監聽安裝事件 ──────────────────
     const handler = (e: Event) => {
       e.preventDefault();
+      // 使用者已按過 X → 永久不再顯示
+      try {
+        if (localStorage.getItem('pwa-banner-dismissed')) return;
+      } catch {}
       setDeferredPrompt(e as BeforeInstallPromptEvent);
       setTimeout(() => setShowBanner(true), 2500);
     };

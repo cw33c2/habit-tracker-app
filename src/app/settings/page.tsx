@@ -6,8 +6,15 @@ import GoogleSheetsSyncModal from '@/components/GoogleSheetsSyncModal';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 
+const themeOptions = [
+  { id: 'dark', name: '極夜黑客 (Dark)', icon: '🟢', desc: '深藍黑配色，極簡科技質感' },
+  { id: 'violet', name: '紫羅蘭微光 (Violet)', icon: '🟣', desc: '柔和紫調，舒緩專注體驗' },
+  { id: 'cyber', name: '賽博霓虹 (Cyber)', icon: '💗', desc: '炫彩粉紫，充滿活力衝勁' },
+  { id: 'light', name: '日系簡約 (Light)', icon: '⚪', desc: '明亮簡潔，清新無負擔' },
+] as const;
+
 export default function SettingsPage() {
-  const { habits, importHabits } = useHabitStore();
+  const { habits, importHabits, theme, setTheme } = useHabitStore();
   const [mounted, setMounted] = useState(false);
   const [showSheetsModal, setShowSheetsModal] = useState(false);
 
@@ -27,6 +34,28 @@ export default function SettingsPage() {
             </svg>
           </Link>
           <h1 className="text-2xl font-bold text-teal-400 tracking-wider">&gt; 系統設定</h1>
+        </div>
+
+        {/* 🎨 視覺風格主題切換 */}
+        <h2 className="text-xs text-slate-500 uppercase tracking-widest mb-4">視覺風格主題</h2>
+        <div className="grid grid-cols-2 gap-2.5 mb-8">
+          {themeOptions.map((t) => (
+            <button
+              key={t.id}
+              onClick={() => setTheme(t.id)}
+              className={`text-left p-3 rounded-xl border transition-all ${
+                theme === t.id
+                  ? 'bg-teal-950/60 border-teal-500 text-teal-300 shadow-md shadow-teal-950/50'
+                  : 'bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700'
+              }`}
+            >
+              <div className="flex items-center gap-1.5 font-bold text-xs mb-1">
+                <span>{t.icon}</span>
+                <span>{t.name}</span>
+              </div>
+              <div className="text-[10px] text-slate-500">{t.desc}</div>
+            </button>
+          ))}
         </div>
 
         {/* ☁️ 雲端同步與資料備份 */}
