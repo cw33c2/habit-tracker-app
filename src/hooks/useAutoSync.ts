@@ -140,5 +140,25 @@ export function useAutoSync() {
     };
   }, []);
 
+  // ③ 每半小時 (30 分鐘) 自動上傳至 Google 試算表
+  useEffect(() => {
+    const THIRTY_MINUTES_MS = 30 * 60 * 1000;
+
+    const intervalId = setInterval(async () => {
+      const { sheetsApiUrl, habits } = useHabitStore.getState();
+      if (!sheetsApiUrl || !habits || habits.length === 0) return;
+
+      setSyncStatus('syncing');
+      const ok = await fetchWithTimeout(
+        () => syncToGoogleSheets(sheetsApiUrl, habits),
+        10000
+      );
+      setSyncStatus(ok ? 'success' : 'error');
+      setTimeout(() => setSyncStatus('idle'), 3000);
+    }, THIRTY_MINUTES_MS);
+
+    return () => clearInterval(intervalId);
+  }, []);
+
   return { syncStatus };
 }
