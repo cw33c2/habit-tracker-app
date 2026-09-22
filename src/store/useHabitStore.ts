@@ -318,6 +318,21 @@ export const useHabitStore = create<HabitState>()(
     }),
     {
       name: 'habit-storage',
+      // 🛡️ A計畫懶人包規範：使用 Zod 進行 LocalStorage 安全相容性驗證與清洗
+      migrate: (persistedState: any) => {
+        if (!persistedState) return persistedState;
+        try {
+          if (Array.isArray(persistedState.habits)) {
+            persistedState.habits = persistedState.habits.map((h: any) => {
+              const res = HabitSchema.safeParse(h);
+              return res.success ? res.data : h;
+            });
+          }
+        } catch {
+          // 安全防護
+        }
+        return persistedState;
+      },
     }
   )
 );
