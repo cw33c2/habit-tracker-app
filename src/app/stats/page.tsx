@@ -6,11 +6,8 @@ import Heatmap from '@/components/Heatmap';
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 
-
-
 type ViewMode = 'today' | 'week' | 'month';
 
-// 取得過去 N 天的日期陣列
 function getPastDays(n: number): string[] {
   const days: string[] = [];
   for (let i = n - 1; i >= 0; i--) {
@@ -33,17 +30,17 @@ function formatDate(dateStr: string): string {
 }
 
 export default function StatsPage() {
-  const { habits, importHabits, removeHabit } = useHabitStore();
+  const { habits, removeHabit } = useHabitStore();
   const [mounted, setMounted] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('today');
-  const [showSheetsModal, setShowSheetsModal] = useState(false);
 
   useEffect(() => { setMounted(true); }, []);
 
   const totalHabits = (habits || []).length;
   const days = viewMode === 'today' ? getPastDays(1) : viewMode === 'week' ? getPastDays(7) : getPastDays(30);
+  const todayStr = useMemo(() => new Date().toISOString().split('T')[0], []);
 
-  // 每天完成率 (Hook 必須放在早退 if (!mounted) 之前，符合 Rules of Hooks)
+  // 每天完成率
   const dailyStats = useMemo(() =>
     days.map(dateStr => {
       const completed = (habits || []).filter(h => (h.completedDates || []).includes(dateStr)).length;
@@ -52,8 +49,6 @@ export default function StatsPage() {
     }),
     [habits, days, totalHabits]
   );
-
-
 
   // 整體平均完成率
   const avgRate = dailyStats.length === 0 ? 0
@@ -65,7 +60,6 @@ export default function StatsPage() {
   // 最高連勝計算
   let currentStreak = 0;
   let maxStreak = 0;
-  const today = new Date().toISOString().split('T')[0];
   const allDays = getPastDays(90);
   for (const dateStr of allDays) {
     const completed = (habits || []).filter(h => (h.completedDates || []).includes(dateStr)).length;
@@ -73,11 +67,15 @@ export default function StatsPage() {
       currentStreak++;
       maxStreak = Math.max(maxStreak, currentStreak);
     } else {
-      if (dateStr < today) currentStreak = 0; // 不因今天未完成就中斷
+      if (dateStr < todayStr) currentStreak = 0;
     }
   }
 
-  const maxRate = Math.max(...dailyStats.map(d => d.rate), 1); // avoid divide by 0
+  // 今日完成項目數
+  const todayCompletedHabits = (habits || []).filter(h => (h.completedDates || []).includes(todayStr));
+  const todayRate = totalHabits === 0 ? 0 : Math.round((todayCompletedHabits.length / totalHabits) * 100);
+
+  if (!mounted) return null;
 
   return (
     <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)] font-sans pb-36 transition-colors duration-400">
@@ -97,106 +95,195 @@ export default function StatsPage() {
         <div className="grid grid-cols-3 gap-1 bg-slate-900 border border-slate-700 rounded-xl p-1 mb-6">
           <button
             onClick={() => setViewMode('today')}
-            className={`py-2 rounded-lg text-sm font-bold transition-all text-center ${
+            className={`py-2.5 rounded-lg text-xs font-bold transition-all text-center ${
               viewMode === 'today' ? 'bg-teal-600 text-white shadow-md shadow-teal-950/50' : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            ☀️ 本日
+            ☀️ 本日檢視
           </button>
           <button
             onClick={() => setViewMode('week')}
-            className={`py-2 rounded-lg text-sm font-bold transition-all text-center ${
+            className={`py-2.5 rounded-lg text-xs font-bold transition-all text-center ${
               viewMode === 'week' ? 'bg-teal-600 text-white shadow-md shadow-teal-950/50' : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            📅 本週
+            📅 本週數據
           </button>
           <button
             onClick={() => setViewMode('month')}
-            className={`py-2 rounded-lg text-sm font-bold transition-all text-center ${
+            className={`py-2.5 rounded-lg text-xs font-bold transition-all text-center ${
               viewMode === 'month' ? 'bg-teal-600 text-white shadow-md shadow-teal-950/50' : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            🗓️ 本月
+            🗓️ 本月月報
           </button>
         </div>
 
-        {/* Summary Cards */}
-        <div className="grid grid-cols-3 gap-3 mb-8">
-          <div className="bg-slate-900 border border-slate-700 rounded-xl p-4 text-center">
-            <div className="text-2xl font-bold text-teal-400">{avgRate}%</div>
-            <div className="text-[10px] text-slate-500 mt-1">平均完成率</div>
-          </div>
-          <div className="bg-slate-900 border border-slate-700 rounded-xl p-4 text-center">
-            <div className="text-2xl font-bold text-orange-400">{perfectDays}</div>
-            <div className="text-[10px] text-slate-500 mt-1">全勤天數</div>
-          </div>
-          <div className="bg-slate-900 border border-slate-700 rounded-xl p-4 text-center">
-            <div className="text-2xl font-bold text-purple-400">{maxStreak}</div>
-            <div className="text-[10px] text-slate-500 mt-1">最高連勝</div>
-          </div>
-        </div>
+        {/* 🧠 邏輯分工 1：【☀️ 本日】專屬邏輯 */}
+        {viewMode === 'today' && (
+          <div className="space-y-6 animate-fadeIn">
+            {/* 今日完成率大卡片 */}
+            <div className="bg-slate-900 border border-slate-700 rounded-2xl p-6 text-center shadow-xl relative overflow-hidden">
+              <div className="text-xs text-slate-400 uppercase tracking-widest mb-1">今日目標進度</div>
+              <div className="text-4xl font-black text-teal-400 mb-2">{todayRate}%</div>
+              <div className="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden mb-3">
+                <div
+                  className="h-full bg-gradient-to-r from-teal-500 to-emerald-400 transition-all duration-500 rounded-full"
+                  style={{ width: `${todayRate}%` }}
+                />
+              </div>
+              <div className="text-xs text-slate-400">
+                已完成 <span className="text-teal-400 font-bold">{todayCompletedHabits.length}</span> / {totalHabits} 項習慣
+              </div>
+            </div>
 
-        {/* 🟩 活躍度紀錄（過去 12 週熱力圖） */}
-        <div className="mb-8">
-          <Heatmap weeks={12} />
-        </div>
+            {/* 今日習慣打卡狀態清單 */}
+            <div className="bg-slate-900 border border-slate-700 rounded-2xl p-5 shadow-xl">
+              <h3 className="text-sm font-bold text-slate-100 mb-3 flex items-center justify-between">
+                <span>📋 今日習慣執行清單</span>
+                <span className="text-[10px] text-slate-500 font-mono">{todayStr}</span>
+              </h3>
+              {totalHabits === 0 ? (
+                <p className="text-xs text-slate-500 text-center py-4">今日尚未新增習慣</p>
+              ) : (
+                <div className="space-y-2">
+                  {(habits || []).map((h) => {
+                    const isDone = (h.completedDates || []).includes(todayStr);
+                    return (
+                      <div
+                        key={h.id}
+                        className={`p-3 rounded-xl border flex items-center justify-between transition-all ${
+                          isDone
+                            ? 'bg-teal-950/30 border-teal-800/60 text-teal-300'
+                            : 'bg-slate-950 border-slate-800 text-slate-400'
+                        }`}
+                      >
+                        <span className="text-xs font-bold truncate flex-1">{h.title}</span>
+                        <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                          isDone ? 'bg-teal-900 text-teal-300' : 'bg-slate-800 text-slate-500'
+                        }`}>
+                          {isDone ? '✅ 已完成' : '⏳ 未打卡'}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
 
-        {/* Bar Chart */}
-        <h2 className="text-xs text-slate-500 uppercase tracking-widest mb-4">
-          每日完成率（{viewMode === 'today' ? '本日' : viewMode === 'week' ? '近 7 天' : '近 30 天'}）
-        </h2>
-
-        {totalHabits === 0 ? (
-          <div className="bg-slate-900 border border-dashed border-slate-700 rounded-xl p-8 text-center">
-            <p className="text-slate-500 text-sm">還沒有習慣紀錄</p>
-            <p className="text-xs text-slate-600 mt-1">先回首頁新增習慣並打卡吧！</p>
+            {/* 今日筆記時間軸 */}
+            <NotesTimeline habits={habits || []} defaultPeriod="today" />
           </div>
-        ) : (
-          <div className="bg-slate-900 border border-slate-700 rounded-xl p-4">
-            <div className="flex items-end gap-1 h-32">
-              {dailyStats.map(({ dateStr, rate }) => (
-                <div key={dateStr} className="flex-1 flex flex-col items-center gap-1">
-                  {/* Bar */}
-                  <div className="w-full flex items-end justify-center" style={{ height: '100px' }}>
-                    <div
-                      className={`w-full rounded-t transition-all duration-500 ${
-                        rate === 0 ? 'bg-slate-800' :
-                        rate < 50 ? 'bg-teal-900' :
-                        rate < 80 ? 'bg-teal-600' :
-                        rate === 100 ? 'bg-teal-400' : 'bg-teal-500'
-                      }`}
-                      style={{ height: `${Math.max(rate, 4)}%` }}
-                      title={`${formatDate(dateStr)}: ${rate}%`}
-                    />
-                  </div>
-                  {/* Day label */}
-                  <div className="text-[9px] text-slate-600">{formatDay(dateStr)}</div>
-                  {/* Rate label (only show on weekly view) */}
-                  {viewMode === 'week' && (
+        )}
+
+        {/* 🧠 邏輯分工 2：【📅 本週】專屬邏輯 */}
+        {viewMode === 'week' && (
+          <div className="space-y-6 animate-fadeIn">
+            {/* 本週 Summary Cards */}
+            <div className="grid grid-cols-3 gap-3">
+              <div className="bg-slate-900 border border-slate-700 rounded-xl p-4 text-center">
+                <div className="text-2xl font-bold text-teal-400">{avgRate}%</div>
+                <div className="text-[10px] text-slate-500 mt-1">週平均完成率</div>
+              </div>
+              <div className="bg-slate-900 border border-slate-700 rounded-xl p-4 text-center">
+                <div className="text-2xl font-bold text-orange-400">{perfectDays}</div>
+                <div className="text-[10px] text-slate-500 mt-1">本週全勤天數</div>
+              </div>
+              <div className="bg-slate-900 border border-slate-700 rounded-xl p-4 text-center">
+                <div className="text-2xl font-bold text-purple-400">{maxStreak}</div>
+                <div className="text-[10px] text-slate-500 mt-1">最高連勝</div>
+              </div>
+            </div>
+
+            {/* 本週每日長條圖 */}
+            <div className="bg-slate-900 border border-slate-700 rounded-2xl p-4 shadow-xl">
+              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">
+                近 7 天每日完成率 (%)
+              </h3>
+              <div className="flex items-end gap-1 h-32 pt-4">
+                {dailyStats.map(({ dateStr, rate }) => (
+                  <div key={dateStr} className="flex-1 flex flex-col items-center gap-1">
+                    <div className="w-full flex items-end justify-center" style={{ height: '90px' }}>
+                      <div
+                        className={`w-full rounded-t transition-all duration-500 ${
+                          rate === 0 ? 'bg-slate-800' :
+                          rate < 50 ? 'bg-teal-900' :
+                          rate < 80 ? 'bg-teal-600' :
+                          rate === 100 ? 'bg-teal-400' : 'bg-teal-500'
+                        }`}
+                        style={{ height: `${Math.max(rate, 4)}%` }}
+                        title={`${formatDate(dateStr)}: ${rate}%`}
+                      />
+                    </div>
+                    <div className="text-[9px] text-slate-500">{formatDay(dateStr)}</div>
                     <div className={`text-[9px] font-bold ${rate === 100 ? 'text-teal-400' : 'text-slate-500'}`}>
                       {rate}%
                     </div>
-                  )}
-                </div>
-              ))}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* 本週睡眠趨勢 */}
+            <SleepStatsChart />
+
+            {/* 本週逐項習慣表現 */}
+            <div className="space-y-3">
+              <h3 className="text-xs text-slate-400 uppercase tracking-widest font-bold">本週逐項習慣完成率</h3>
+              {(habits || []).map(habit => {
+                const completedCount = days.filter(d => (habit.completedDates || []).includes(d)).length;
+                const rate = Math.round((completedCount / days.length) * 100);
+                return (
+                  <div key={habit.id} className="bg-slate-900 border border-slate-700 rounded-xl p-4">
+                    <div className="flex justify-between items-center mb-2 gap-2">
+                      <span className="text-sm text-slate-200 flex-1 truncate font-medium">{habit.title}</span>
+                      <span className={`text-sm font-bold ${rate >= 80 ? 'text-teal-400' : rate >= 50 ? 'text-orange-400' : 'text-slate-500'}`}>
+                        {rate}%
+                      </span>
+                    </div>
+                    <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full transition-all duration-500 ${
+                          rate >= 80 ? 'bg-teal-500' : rate >= 50 ? 'bg-orange-500' : 'bg-slate-600'
+                        }`}
+                        style={{ width: `${rate}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           </div>
         )}
 
-        {/* 🛏️ 睡眠數據與線圖統計 */}
-        <SleepStatsChart />
+        {/* 🧠 邏輯分工 3：【🗓️ 本月】專屬邏輯 */}
+        {viewMode === 'month' && (
+          <div className="space-y-6 animate-fadeIn">
+            {/* 本月 12 週活躍度熱力圖 */}
+            <div>
+              <Heatmap weeks={12} />
+            </div>
 
-        {/* 📖 打卡筆記養成日記時間軸 */}
-        <div className="mt-8">
-          <NotesTimeline habits={habits || []} />
-        </div>
+            {/* 本月長效指標 */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-slate-900 border border-slate-700 rounded-xl p-4 text-center">
+                <div className="text-3xl font-bold text-orange-400 mb-1">{perfectDays}</div>
+                <div className="text-xs text-slate-400 font-bold">本月全勤天數</div>
+                <div className="text-[10px] text-slate-500 mt-0.5">達成率 100% 的日子</div>
+              </div>
+              <div className="bg-slate-900 border border-slate-700 rounded-xl p-4 text-center">
+                <div className="text-3xl font-bold text-purple-400 mb-1">{maxStreak}</div>
+                <div className="text-xs text-slate-400 font-bold">最高連勝紀錄</div>
+                <div className="text-[10px] text-slate-500 mt-0.5">連續不間斷天數</div>
+              </div>
+            </div>
 
-        {/* Per-Habit Summary */}
-        {totalHabits > 0 && (
-          <>
-            <h2 className="text-xs text-slate-500 uppercase tracking-widest mt-8 mb-4">逐項習慣完成率</h2>
+            {/* 本月筆記總覽 */}
+            <NotesTimeline habits={habits || []} defaultPeriod="month" />
+
+            {/* 本月逐項習慣表現 */}
             <div className="space-y-3">
+              <h3 className="text-xs text-slate-400 uppercase tracking-widest font-bold">本月逐項習慣表現</h3>
               {(habits || []).map(habit => {
                 const completedCount = days.filter(d => (habit.completedDates || []).includes(d)).length;
                 const rate = Math.round((completedCount / days.length) * 100);
@@ -232,13 +319,13 @@ export default function StatsPage() {
                       />
                     </div>
                     <div className="text-[10px] text-slate-600 mt-1">
-                      {viewMode === 'today' ? '今日' : viewMode === 'week' ? '近 7 天' : '近 30 天'}完成 {completedCount} / {days.length} 天
+                      本月累積完成 {completedCount} / {days.length} 天
                     </div>
                   </div>
                 );
               })}
             </div>
-          </>
+          </div>
         )}
 
       </main>
@@ -277,7 +364,6 @@ export default function StatsPage() {
           </Link>
         </div>
       </div>
-
     </div>
   );
 }

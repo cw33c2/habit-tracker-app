@@ -5,12 +5,13 @@ import { Habit } from '@/store/useHabitStore';
 
 interface NotesTimelineProps {
   habits: Habit[];
+  defaultPeriod?: FilterPeriod;
 }
 
 type FilterPeriod = 'today' | 'week' | 'month' | 'all';
 
-export default function NotesTimeline({ habits }: NotesTimelineProps) {
-  const [filterPeriod, setFilterPeriod] = useState<FilterPeriod>('today');
+export default function NotesTimeline({ habits, defaultPeriod = 'today' }: NotesTimelineProps) {
+  const [filterPeriod, setFilterPeriod] = useState<FilterPeriod>(defaultPeriod);
 
   // 1. 收集所有筆記
   const allNotes = useMemo(() => {
