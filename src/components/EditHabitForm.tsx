@@ -184,6 +184,44 @@ export default function EditHabitForm({ habit, onClose }: EditHabitFormProps) {
               </div>
             )}
 
+            {/* Notes History List */}
+            {(habit.notes || []).length > 0 && (
+              <div className="mb-6">
+                <label className="text-xs text-slate-400 uppercase tracking-widest mb-2 block flex items-center gap-1.5">
+                  <span>📝 歷史打卡筆記 ({habit.notes.length} 則)</span>
+                </label>
+                <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
+                  {habit.notes.map((n) => (
+                    <div
+                      key={n.id}
+                      className="bg-slate-950 border border-slate-800 rounded-xl p-3 flex justify-between items-start gap-2"
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="text-[10px] text-teal-400 font-bold mb-1">
+                          📅 {n.createdAt.split('T')[0]} {n.createdAt.split('T')[1]?.slice(0, 5)}
+                        </div>
+                        <div className="text-xs text-slate-200 whitespace-pre-wrap break-words">
+                          {n.note}
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (window.confirm('確定要刪除這則筆記嗎？')) {
+                            useHabitStore.getState().deleteNote(n.id);
+                          }
+                        }}
+                        className="text-slate-500 hover:text-red-400 p-1 text-xs transition-colors flex-shrink-0"
+                        title="刪除筆記"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Urgent Toggle */}
             <div className="mb-6">
               <button

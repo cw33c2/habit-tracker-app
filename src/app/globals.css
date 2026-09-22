@@ -9,24 +9,32 @@
 html.theme-dark {
   --background: #030712;
   --foreground: #f3f4f6;
+  --card-bg: rgba(15, 23, 42, 0.65);
+  --accent-glow: rgba(20, 184, 166, 0.3);
 }
 
-/* 2. 🟣 紫羅蘭微光 (Violet Twilight) */
+/* 2. 🟣 紫羅蘭微光 (Violet Twilight) - 顯眼優雅深紫 */
 html.theme-violet {
-  --background: #1e0b36;
+  --background: #190b38;
   --foreground: #f5f3ff;
+  --card-bg: rgba(36, 17, 75, 0.65);
+  --accent-glow: rgba(168, 85, 247, 0.4);
 }
 
-/* 3. 💗 賽博霓虹 (Cyber Neon) */
+/* 3. 💗 賽博霓虹 (Cyber Neon) - 夢幻炫彩霓虹紫粉 */
 html.theme-cyber {
-  --background: #2a0429;
+  --background: #2b042c;
   --foreground: #fdf2f8;
+  --card-bg: rgba(58, 12, 60, 0.65);
+  --accent-glow: rgba(236, 72, 153, 0.4);
 }
 
 /* 4. ⚪ 日系簡約 (Minimal Light) */
 html.theme-light {
   --background: #f8fafc;
   --foreground: #0f172a;
+  --card-bg: rgba(255, 255, 255, 0.85);
+  --accent-glow: rgba(148, 163, 184, 0.2);
 }
 
 @theme inline {
@@ -45,11 +53,11 @@ body {
 
 /* 玻璃擬態 (Glassmorphism) 特效類別 */
 .glass-card {
-  background: rgba(15, 23, 42, 0.65);
+  background: var(--card-bg, rgba(15, 23, 42, 0.65));
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px 0 var(--accent-glow, rgba(0, 0, 0, 0.37));
 }
 
 .glass-nav {
