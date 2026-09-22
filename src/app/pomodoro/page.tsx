@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useHabitStore } from '@/store/useHabitStore';
 import { playTimerFinishSound } from '@/lib/sound';
+import { triggerConfetti } from '@/lib/confetti';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
@@ -38,6 +39,7 @@ function PomodoroContent() {
       setIsRunning(false);
 
       if (mode === 'work') {
+        triggerConfetti();
         incrementPomodoro();
 
         // 如果選擇了關聯習慣，自動為今日打卡

@@ -4,6 +4,8 @@ import { useState } from 'react';
 import EditHabitForm from '@/components/EditHabitForm';
 import Link from 'next/link';
 
+import { triggerConfetti } from '@/lib/confetti';
+
 export default function TaskItem({ habit, date }: { habit: Habit, date: string }) {
   const toggleHabit = useHabitStore(state => state.toggleHabit);
   const isCompleted = habit.completedDates?.includes(date);
@@ -25,6 +27,7 @@ export default function TaskItem({ habit, date }: { habit: Habit, date: string }
   const confirmComplete = (withNote: boolean) => {
     setShowNoteModal(false);
     setIsHiding(true);
+    triggerConfetti(); // 觸發打卡彩帶動畫
     const text = withNote ? noteInput : undefined;
     setTimeout(() => {
       toggleHabit(habit.id, date, text);
